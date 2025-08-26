@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Landing Research - Human vs AI Performance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-stat {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 30px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.8; }
+            to { opacity: 1; }
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .author {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .nav {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            margin: 40px 0;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section {
+            padding: 60px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        /* Key Findings Slider */
+        .findings-slider {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .finding {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .finding.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .finding-stat {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .finding-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .finding-desc {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .slider-controls {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .slider-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 0 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .slider-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        /* Performance Chart */
+        .chart-container {
+            margin: 40px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            height: 300px;
+            margin: 30px 0;
+        }
+
+        .bar {
+            width: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: end;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            transition: all 0.8s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .bar:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .bar-human {
+            height: 61%;
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .bar-ai {
+            height: 23%;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .bar-value {
+            padding: 8px;
+            font-size: 1rem;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -30px;
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Simulation Demo */
+        .demo-container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .lunar-sim {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(180deg, #000428 0%, #004e92 100%);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #333;
+        }
+
+        .lander {
+            width: 30px;
+            height: 30px;
+            background: #ff6b6b;
+            position: absolute;
+            border-radius: 4px;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .terrain {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            background: #444;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .landing-pad {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 10px;
+            background: #4ecdc4;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.7);
+        }
+
+        .constraints-panel {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            color: white;
+        }
+
+        .constraint {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+
+        .constraint.active {
+            background: rgba(255, 107, 107, 0.3);
+            animation: flash 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes flash {
+            from { opacity: 0.7; }
+            to { opacity: 1; }
+        }
+
+        .demo-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .demo-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 0 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: #44a08d;
+            transform: translateY(-2px);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin: 40px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .timeline-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .timeline-content p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+
+        .timeline-number {
+            width: 60px;
+            height: 60px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Contact Section */
+        .contact {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px;
+            margin-top: 40px;
+        }
+
+        .contact h2 {
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-5px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-stat {
+                font-size: 3rem;
+            }
+
+            .section {
+                padding: 30px;
+            }
+
+            .nav-container {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .chart {
+                height: 250px;
+            }
+
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="container">
+            <h1>Autonomous Landing Research</h1>
+            <div class="hero-stat">0% AI Success vs 61% Human Success</div>
+            <p>Comprehensive Analysis of Learning Limitations and Environmental Adaptation</p>
+            <div class="author">By Sivakshan.S | MSc Robotics and Artificial Intelligence | University of Aberdeen</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="container">
+            <div class="nav-container">
+                <button class="nav-btn active" onclick="showSection('findings')">Key Findings</button>
+                <button class="nav-btn" onclick="showSection('demo')">Live Simulation</button>
+                <button class="nav-btn" onclick="showSection('analysis')">Research Analysis</button>
+                <button class="nav-btn" onclick="showSection('timeline')">Research Journey</button>
+                <button class="nav-btn" onclick="showSection('contact')">Contact</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-content">
+            <!-- Key Findings Section -->
+            <div id="findings" class="section active">
+                <h2>Critical Research Findings</h2>
+                
+                <div class="findings-slider">
+                    <div class="finding active">
+                        <div class="finding-stat">59.6%</div>
+                        <div class="finding-title">Superior Human Performance</div>
+                        <div class="finding-desc">Human pilots achieved 59.6% better mission rewards compared to the best RL agent (PPO-Curriculum)</div>
+                    </div>
+                    
+                    <div class="finding">
+                        <div class="finding-stat">38.75×</div>
+                        <div class="finding-title">Fuel Efficiency Gap</div>
+                        <div class="finding-desc">Humans demonstrated 38.75× better fuel efficiency (0.21±0.05 vs 8.2±12.4 units)</div>
+                    </div>
+                    
+                    <div class="finding">
+                        <div class="finding-stat">0%</div>
+                        <div class="finding-title">AI Adaptation Failure</div>
+                        <div class="finding-desc">All RL algorithms achieved 0% success under maximum constraint conditions</div>
+                    </div>
+                    
+                    <div class="finding">
+                        <div class="finding-stat">102%</div>
+                        <div class="finding-title">PPO Improvement</div>
+                        <div class="finding-desc">PPO with curriculum learning showed 102% improvement in survival time over baseline</div>
+                    </div>
+                    
+                    <div class="finding">
+                        <div class="finding-stat">4.2ms</div>
+                        <div class="finding-title">Real-time Explanations</div>
+                        <div class="finding-desc">SHAP analysis achieved real-time explanation generation with minimal overhead</div>
+                    </div>
+                    
+                    <div class="finding">
+                        <div class="finding-stat">7</div>
+                        <div class="finding-title">Multi-Constraint Testing</div>
+                        <div class="finding-desc">First comprehensive framework with seven simultaneous real-world constraints</div>
+                    </div>
+                </div>
+                
+                <div class="slider-controls">
+                    <button class="slider-btn" onclick="prevFinding()">Previous</button>
+                    <button class="slider-btn" onclick="nextFinding()">Next</button>
+                </div>
+                
+                <div class="slider-indicators">
+                    <span class="indicator active" onclick="showFinding(0)"></span>
+                    <span class="indicator" onclick="showFinding(1)"></span>
+                    <span class="indicator" onclick="showFinding(2)"></span>
+                    <span class="indicator" onclick="showFinding(3)"></span>
+                    <span class="indicator" onclick="showFinding(4)"></span>
+                    <span class="indicator" onclick="showFinding(5)"></span>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="text-align: center; margin-bottom: 20px;">Success Rate Comparison</h3>
+                    <div class="chart">
+                        <div class="bar bar-human">
+                            <div class="bar-value">61%</div>
+                            <div class="bar-label">Human Pilots</div>
+                        </div>
+                        <div class="bar bar-ai">
+                            <div class="bar-value">23%</div>
+                            <div class="bar-label">PPO-Curriculum</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Simulation Section -->
+            <div id="demo" class="section">
+                <h2>Live Landing Simulation</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Watch how seven simultaneous constraints affect autonomous landing performance</p>
+                
+                <div class="demo-container">
+                    <div class="lunar-sim" id="lunarSim">
+                        <div class="lander" id="lander"></div>
+                        <div class="terrain"></div>
+                        <div class="landing-pad"></div>
+                    </div>
+                    
+                    <div class="constraints-panel">
+                        <h3 style="text-align: center; margin-bottom: 20px;">Active Constraints Monitor</h3>
+                        <div class="constraint" id="actuator">
+                            <span>Actuator Failures</span>
+                            <span id="actuatorStatus">40-60% failure rate</span>
+                        </div>
+                        <div class="constraint" id="wind">
+                            <span>Wind Disturbances</span>
+                            <span id="windStatus">7.5-15.0 force units</span>
+                        </div>
+                        <div class="constraint" id="rain">
+                            <span>Rain Effects</span>
+                            <span id="rainStatus">30-50% efficiency loss</span>
+                        </div>
+                        <div class="constraint" id="battery">
+                            <span>Battery Depletion</span>
+                            <span id="batteryStatus">400 steps limit</span>
+                        </div>
+                        <div class="constraint" id="sensor">
+                            <span>Sensor Noise</span>
+                            <span id="sensorStatus">15% amplitude</span>
+                        </div>
+                        <div class="constraint" id="payload">
+                            <span>Payload Variation</span>
+                            <span id="payloadStatus">±30% mass</span>
+                        </div>
+                        <div class="constraint" id="communication">
+                            <span>Communication Delay</span>
+                            <span id="commStatus">2-step latency</span>
+                        </div>
+                    </div>
+                    
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo()">Start Landing Sequence</button>
+                        <button class="demo-btn" onclick="resetDemo()">Reset Simulation</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Analysis Section -->
+            <div id="analysis" class="section">
+                <h2>Multi-Constraint Environment Analysis</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Comprehensive breakdown of the seven simultaneous constraints tested in your research</p>
+                
+                <div class="demo-container">                    
+                    <div class="constraints-panel">
+                        <h3 style="text-align: center; margin-bottom: 20px;">Seven-Constraint Framework from Table 1</h3>
+                        <div class="constraint active">
+                            <span><strong>Actuator Failures:</strong> Stochastic thrust reduction</span>
+                            <span>40-60% failure probability</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Wind Disturbances:</strong> 3D Perlin noise turbulence</span>
+                            <span>7.5-15.0 force units</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Rain Effects:</strong> Thrust efficiency reduction</span>
+                            <span>30-50% efficiency loss</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Battery Depletion:</strong> Time constraint</span>
+                            <span>400 simulation steps</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Sensor Noise:</strong> Gaussian noise injection</span>
+                            <span>15% signal amplitude</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Payload Variation:</strong> Dynamic mass changes</span>
+                            <span>±30% mass fluctuation</span>
+                        </div>
+                        <div class="constraint">
+                            <span><strong>Communication Delay:</strong> Action execution lag</span>
+                            <span>2-step latency</span>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; margin-top: 30px; color: white;">
+                        <h3 style="text-align: center; margin-bottom: 25px;">SHAP Feature Importance Analysis</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                            <div style="background: rgba(78, 205, 196, 0.3); padding: 20px; border-radius: 10px;">
+                                <h4>Y-Position (Altitude)</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: #4ecdc4;">11.4 ± 2.1</div>
+                                <p>Highest feature attribution - Physics aligned: High</p>
+                            </div>
+                            <div style="background: rgba(255, 107, 107, 0.3); padding: 20px; border-radius: 10px;">
+                                <h4>Y-Velocity (Descent)</h4>
+                                <div style="font-size: 2rem; font-weight: bold; color: #ff6b6b;">-9.7 ± 1.8</div>
+                                <p>Critical negative attribution - Physics aligned: High</p>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px; font-size: 1.1rem; opacity: 0.9;">
+                            Real-time explanation generation: <strong>4.2ms average</strong>, enabling operational deployment
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; margin-top: 30px; color: white;">
+                        <h3 style="text-align: center; margin-bottom: 25px;">Cross-Planetary Performance (Table 4)</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                                <h4>Lunar Gravity</h4>
+                                <div style="font-size: 1.5rem; font-weight: bold;">-102.2 ± 45.3</div>
+                                <p>PPO-Curriculum performance</p>
+                            </div>
+                            <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                                <h4>Martian Gravity</h4>
+                                <div style="font-size: 1.5rem; font-weight: bold;">-134.7 ± 52.1</div>
+                                <p>Degraded performance</p>
+                            </div>
+                            <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px;">
+                                <h4>Earth Gravity</h4>
+                                <div style="font-size: 1.5rem; font-weight: bold;">-187.3 ± 67.8</div>
+                                <p>Significant degradation</p>
+                            </div>
+                            <div style="text-align: center; background: rgba(78, 205, 196, 0.3); padding: 15px; border-radius: 8px;">
+                                <h4>Human Adaptation</h4>
+                                <div style="font-size: 1.5rem; font-weight: bold;">0.94</div>
+                                <p>Stable across environments</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research Timeline Section -->
+            <div id="timeline" class="section">
+                <h2>Research Journey: Expectations vs Reality</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-number">1</div>
+                        <div class="timeline-content">
+                            <h3>What We Expected</h3>
+                            <p>Advanced RL algorithms would demonstrate superior performance over classical controllers and approach human-level capabilities in autonomous landing tasks. We anticipated that multi-constraint scenarios would challenge but not catastrophically fail RL systems.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-number">2</div>
+                        <div class="timeline-content">
+                            <h3>What We Discovered</h3>
+                            <p>Reality revealed stark limitations: 0% RL success under maximum constraints vs 61% human success. PPO-Curriculum achieved only 23% success rate with 38.75× worse fuel efficiency than humans. Universal failure across all algorithms under realistic conditions.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-number">3</div>
+                        <div class="timeline-content">
+                            <h3>Critical Insights</h3>
+                            <p>Current RL approaches exhibit rigid, memorized patterns rather than adaptive intelligence. SHAP analysis revealed correct feature focus (altitude: 11.4±2.1 importance) but lack of causal reasoning. Agents demonstrate reactive rather than anticipatory control strategies.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-number">4</div>
+                        <div class="timeline-content">
+                            <h3>What This Means</h3>
+                            <p>The substantial human-AI performance gap demands fundamental algorithmic improvements before safety-critical deployment. Hybrid human-AI systems and graduated deployment frameworks are essential. Current explainability tools reveal feature usage but not reasoning processes.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-number">5</div>
+                        <div class="timeline-content">
+                            <h3>Future Directions</h3>
+                            <p>Research must prioritize meta-learning for rapid adaptation, physics-informed causal reasoning, and human-in-the-loop operational frameworks. The three-tier deployment strategy (Classical→RL→Human) offers a practical pathway for gradual autonomy integration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div id="contact" class="contact">
+            <h2>Connect & Collaborate</h2>
+            <p>This research establishes autonomous landing as the definitive benchmark for safety-critical AI certification</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <h3>Researcher</h3>
+                    <p>Sivakshan.S</p>
+                    <p>MSc Robotics and AI</p>
+                    <p>University of Aberdeen</p>
+                </div>
+                <div class="contact-item">
+                    <h3>Contact E-mail</h3>
+                    <p>ssivakshan@gmail.com</p>
+                    <p>School of Engineering</p>
+                    <p>University of Aberdeen</p>
+                </div>
+                
+                <div class="contact-item">
+                    <h3>Research Impact</h3>
+                    <p>First comprehensive quantification of human-AI performance gaps in safety-critical autonomous systems</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFinding = 0;
+        const totalFindings = 6;
+        let demoRunning = false;
+        let demoInterval;
+        let landerPosition = { x: 50, y: 10 };
+        let constraintCycle = 0;
+
+        // Key Findings Slider Functions
+        function showFinding(index) {
+            document.querySelectorAll('.finding').forEach(f => f.classList.remove('active'));
+            document.querySelectorAll('.indicator').forEach(i => i.classList.remove('active'));
+            
+            document.querySelectorAll('.finding')[index].classList.add('active');
+            document.querySelectorAll('.indicator')[index].classList.add('active');
+            
+            currentFinding = index;
+        }
+
+        function nextFinding() {
+            currentFinding = (currentFinding + 1) % totalFindings;
+            showFinding(currentFinding);
+        }
+
+        function prevFinding() {
+            currentFinding = (currentFinding - 1 + totalFindings) % totalFindings;
+            showFinding(currentFinding);
+        }
+
+        // Auto-advance slider
+        setInterval(() => {
+            if (document.getElementById('findings').classList.contains('active')) {
+                nextFinding();
+            }
+        }, 4000);
+
+        // Navigation Functions
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (sectionId === 'timeline') {
+                animateTimeline();
+            }
+        }
+
+        // Demo Functions
+        function startDemo() {
+            if (demoRunning) return;
+            
+            demoRunning = true;
+            landerPosition = { x: 50, y: 10 };
+            updateLanderPosition();
+            
+            let step = 0;
+            const constraints = ['actuator', 'wind', 'rain', 'battery', 'sensor', 'payload', 'communication'];
+            
+            demoInterval = setInterval(() => {
+                // Simulate descent
+                landerPosition.y += 2;
+                landerPosition.x += (Math.random() - 0.5) * 8; // Random lateral movement
+                
+                // Keep lander in bounds
+                landerPosition.x = Math.max(10, Math.min(90, landerPosition.x));
+                
+                updateLanderPosition();
+                
+                // Activate constraints cyclically
+                if (step % 30 === 0) {
+                    activateConstraint(constraints[constraintCycle % constraints.length]);
+                    constraintCycle++;
+                }
+                
+                // Stop simulation when lander reaches bottom
+                if (landerPosition.y > 85) {
+                    clearInterval(demoInterval);
+                    demoRunning = false;
+                    
+                    // Check landing success (simplified)
+                    const isSuccessful = Math.abs(landerPosition.x - 50) < 10;
+                    setTimeout(() => {
+                        alert(isSuccessful ? 'Successful Landing!' : 'Landing Failed - Outside target zone');
+                        resetDemo();
+                    }, 500);
+                }
+                
+                step++;
+            }, 100);
+        }
+
+        function resetDemo() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+            }
+            demoRunning = false;
+            landerPosition = { x: 50, y: 10 };
+            updateLanderPosition();
+            
+            // Reset all constraints
+            document.querySelectorAll('.constraint').forEach(c => c.classList.remove('active'));
+            constraintCycle = 0;
+        }
+
+        function updateLanderPosition() {
+            const lander = document.getElementById('lander');
+            lander.style.left = landerPosition.x + '%';
+            lander.style.top = landerPosition.y + '%';
+        }
+
+        function activateConstraint(constraintId) {
+            // Deactivate all constraints first
+            document.querySelectorAll('.constraint').forEach(c => c.classList.remove('active'));
+            
+            // Activate specific constraint
+            document.getElementById(constraintId).classList.add('active');
+            
+            setTimeout(() => {
+                document.getElementById(constraintId).classList.remove('active');
+            }, 3000);
+        }
+
+        // Timeline Animation
+        function animateTimeline() {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            timelineItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('visible');
+                }, index * 300);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial lander position
+            updateLanderPosition();
+            
+            // Add scroll animation for timeline
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                observer.observe(item);
+            });
+        });
+    </script>
+</body>
+</html>
+            
